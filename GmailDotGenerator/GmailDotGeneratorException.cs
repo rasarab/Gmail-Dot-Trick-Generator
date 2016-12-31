@@ -2,64 +2,28 @@
 
 namespace GoMan
 {
-    public class GmailDotGeneratorException : Exception
+    public class GmailDotGeneratorExceptionEmailUsernameTooLong : Exception
     {
-        public GmailDotGeneratorConfiguration Configuration { get; }
-
-        public GmailDotGeneratorException(GmailDotGeneratorConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public GmailDotGeneratorExceptionEmailUsernameTooLong(string message) : base($"The username must be greater than less than or equal too 64 characters: {message}") { }
     }
 
-    public class GmailDotGeneratorExceptionEmailUsernameTooLong : GmailDotGeneratorException
+    public class GmailDotGeneratorExceptionEmailUsernameTooShort : Exception
     {
-        private const string Msg = "The username must be greater than less than or equal too 64 characters.";
-        public override string Message => $"{Msg} {Configuration}";
-
-        public GmailDotGeneratorExceptionEmailUsernameTooLong(GmailDotGeneratorConfiguration configuration) : base(configuration)
-        {
-        }
+        public GmailDotGeneratorExceptionEmailUsernameTooShort(string message) : base($"The username must be greater than 1 character: {message}") { }
     }
 
-    public class GmailDotGeneratorExceptionEmailUsernameTooShort : GmailDotGeneratorException
+    public class GmailDotGeneratorExceptionEmailInvalid : Exception
     {
-        private const string Msg = "The username must be greater than 1 character.";
-        public override string Message => $"{Msg} {Configuration}";
-
-        public GmailDotGeneratorExceptionEmailUsernameTooShort(GmailDotGeneratorConfiguration configuration) : base(configuration)
-        {
-        }
+        public GmailDotGeneratorExceptionEmailInvalid(string message) : base($"The email entered is invalid: {message}") { }
     }
 
-    public class GmailDotGeneratorExceptionEmailInvalid : GmailDotGeneratorException
+    public class GmailDotGeneratorExceptionNoAvaliableEmails : Exception
     {
-        private const string Msg = "The email entered is invalid.";
-        public override string Message => $"{Msg} {Configuration}";
-
-        public GmailDotGeneratorExceptionEmailInvalid(GmailDotGeneratorConfiguration configuration) : base(configuration)
-        {
-        }
-
+        public GmailDotGeneratorExceptionNoAvaliableEmails(string message) : base($"No available emails: {message}") { }
     }
 
-    public class GmailDotGeneratorExceptionNoAvaliableEmails : GmailDotGeneratorException
+    public class GmailDotGeneratorExceptionEmailListIsEmptyOrNull : Exception
     {
-        private const string Msg = "No available emails.";
-        public override string Message =>  $"{Msg} {Configuration}";
-
-        public GmailDotGeneratorExceptionNoAvaliableEmails(GmailDotGeneratorConfiguration configuration) : base(configuration)
-        {
-        }
-    }
-
-    public class GmailDotGeneratorExceptionEmailListIsEmptyOrNull : GmailDotGeneratorException
-    {
-        private const string Msg = "Email list is empty or null.";
-        public override string Message => $"{Msg} {Configuration}";
-
-        public GmailDotGeneratorExceptionEmailListIsEmptyOrNull(GmailDotGeneratorConfiguration configuration) : base(configuration)
-        {
-        }
+        public GmailDotGeneratorExceptionEmailListIsEmptyOrNull(string message) : base($"Email list is empty or null: {message}"){}
     }
 }

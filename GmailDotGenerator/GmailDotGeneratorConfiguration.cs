@@ -23,9 +23,9 @@ namespace GoMan
             this.TotalCombinations = (int) Math.Pow(2, this.UsernameLengthMinusOne);
             this.MaximumEmails = maximumEmails;
 
-            if (!IsValidEmail(email)) throw new GmailDotGeneratorExceptionEmailInvalid(this);
-            if (UsernameLength <= 1) throw new GmailDotGeneratorExceptionEmailUsernameTooShort(this);
-            if (UsernameLength > 64) throw new GmailDotGeneratorExceptionEmailUsernameTooLong(this);
+            if (!IsValidEmail(email)) throw new GmailDotGeneratorExceptionEmailInvalid(ToString());
+            if (UsernameLength <= 1) throw new GmailDotGeneratorExceptionEmailUsernameTooShort(ToString());
+            if (UsernameLength > 64) throw new GmailDotGeneratorExceptionEmailUsernameTooLong(ToString());
         }
 
         private static bool IsValidEmail(string email)
@@ -41,7 +41,7 @@ namespace GoMan
             }
         }
 
-        public override string ToString()
+        public sealed override string ToString()
         {
             return $"Email: {Email}, Username: {Username}, TotalCombinations: {TotalCombinations}, MaximumEmails: {MaximumEmails}, UsernameLength: {UsernameLength}";
         }

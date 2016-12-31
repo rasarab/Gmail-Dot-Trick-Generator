@@ -106,7 +106,7 @@ namespace GoMan
         public GmailDotGeneratorEmailModel GetSingleEmail()
         {
             if (this.GeneratedEmails == null)
-                throw new GmailDotGeneratorExceptionEmailListIsEmptyOrNull(this.Configuration);
+                throw new GmailDotGeneratorExceptionEmailListIsEmptyOrNull(this.Configuration.ToString());
 
             try
             {
@@ -114,7 +114,7 @@ namespace GoMan
             }
             catch
             {
-                throw new GmailDotGeneratorExceptionNoAvaliableEmails(this.Configuration);
+                throw new GmailDotGeneratorExceptionNoAvaliableEmails(this.Configuration.ToString());
             }
         }
 
@@ -126,7 +126,7 @@ namespace GoMan
         public IEnumerator<GmailDotGeneratorEmailModel> GetEnumerable()
         {
             if (this.GeneratedEmails == null || this.GeneratedEmails.Count == 0)
-                throw new GmailDotGeneratorExceptionEmailListIsEmptyOrNull(this.Configuration);
+                throw new GmailDotGeneratorExceptionEmailListIsEmptyOrNull(this.Configuration.ToString());
 
             return this.GeneratedEmails.AsEnumerable().GetEnumerator();
         }
