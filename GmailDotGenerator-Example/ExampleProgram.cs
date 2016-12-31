@@ -1,6 +1,7 @@
 ﻿using System;
+using GoMan;
 
-namespace GoMan
+namespace GmailDotGenerator_Example
 {
     internal class ExampleProgram
     {
@@ -9,7 +10,7 @@ namespace GoMan
         private static void Main()
         {
             PrintEmails("short@googlemail.com");
-            PrintEmails("longernotmuchdffffff@googlemail.com");
+            PrintEmails("longernotmuch@googlemail.com");
             Console.ReadLine();
         }
 
@@ -17,7 +18,7 @@ namespace GoMan
         {
             //Console.Clear();
             var ts = new TimeSpan(e.EstimatedCompletionTime);
-            var secondsRemaining = (int) ts.TotalMilliseconds/1000;
+            var secondsRemaining = (int)ts.TotalMilliseconds / 1000;
 
             if (secondsRemaining != _lastSecondsRemaining)
             {
