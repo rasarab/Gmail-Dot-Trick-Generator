@@ -3,37 +3,44 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace GoMan
 {
     public class GmailDotGenerator : IDisposable
     {
-        public GmailDotGeneratorConfiguration Configuration { get; }
-        public HashSet<GmailDotGeneratorEmailModel> GeneratedEmails { get; set; }
-
         public delegate void EstimatedCompletionTime(object sender, GmailDotGeneratorEventArgs e);
-
-        public event EstimatedCompletionTime OnEstimatedCompletionTime;
 
         public GmailDotGenerator(string email, int maximumEmails = 0)
         {
-            this.Configuration = new GmailDotGeneratorConfiguration(email, maximumEmails);
+            Configuration = new GmailDotGeneratorConfiguration(email, maximumEmails);
         }
 
         [JsonConstructor]
         public GmailDotGenerator(GmailDotGeneratorConfiguration configuration)
         {
-            this.Configuration = configuration;
+            Configuration = configuration;
         }
+
+        public GmailDotGeneratorConfiguration Configuration { get; }
+        public HashSet<GmailDotGeneratorEmailModel> GeneratedEmails { get; set; }
+
+        public void Dispose()
+        {
+            Configuration.Dispose();
+            GeneratedEmails.Clear();
+            OnEstimatedCompletionTime = null;
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        public event EstimatedCompletionTime OnEstimatedCompletionTime;
 
         public IEnumerator<GmailDotGeneratorEmailModel> GenerateEmails()
         {
             ClearEmails();
-            this.GeneratedEmails = Generate();
+            GeneratedEmails = Generate();
             return GetEnumerable();
         }
 
@@ -41,7 +48,7 @@ namespace GoMan
         {
             var generatedEmails = new HashSet<GmailDotGeneratorEmailModel>();
             //StringBuilder sb = new StringBuilder();
-            string username = "";
+            var username = "";
             Stopwatch sw = null;
 
             if (OnEstimatedCompletionTime != null)
@@ -50,31 +57,28 @@ namespace GoMan
                 sw.Start();
             }
 
-            var totalCombos = 0;
-
-            totalCombos = Configuration.MaximumEmails == 0 || Configuration.MaximumEmails > Configuration.TotalCombinations*2
+            var totalCombos = Configuration.MaximumEmails == 0 ||
+                              Configuration.MaximumEmails > Configuration.TotalCombinations*2
                 ? Configuration.TotalCombinations
                 : Configuration.MaximumEmails/2;
 
-            var isMaximumEmailsOdd = (Configuration.MaximumEmails%2 == 1);
+            var isMaximumEmailsOdd = Configuration.MaximumEmails%2 == 1;
             totalCombos += isMaximumEmailsOdd ? 1 : 0;
 
-            for (int i = 0; i < totalCombos; i++)
+            for (var i = 0; i < totalCombos; i++)
             {
-                string binaryString = Convert.ToString(i, 2).PadLeft(this.Configuration.UsernameLengthMinusOne, '0');
-                for (int j = 0; j < (this.Configuration.UsernameLengthMinusOne); j++)
+                var binaryString = Convert.ToString(i, 2).PadLeft(Configuration.UsernameLengthMinusOne, '0');
+                for (var j = 0; j < Configuration.UsernameLengthMinusOne; j++)
                 {
-
-                    username += this.Configuration.Username[j];
-                   // sb.Append(this.Configuration.Username[j]);
+                    username += Configuration.Username[j];
+                    // sb.Append(this.Configuration.Username[j]);
                     if (binaryString[j] == '1')
                     {
                         username += ".";
-                       // sb.Append(".");
+                        // sb.Append(".");
                     }
-                    
                 }
-                username += this.Configuration.Username[this.Configuration.UsernameLengthMinusOne];
+                username += Configuration.Username[Configuration.UsernameLengthMinusOne];
                 //sb.Append(this.Configuration.Username[this.Configuration.UsernameLengthMinusOne]);
                 var generatorEmailModel1 = new GmailDotGeneratorEmailModel(username + "@gmail.com");
                 var generatorEmailModel2 = new GmailDotGeneratorEmailModel(username + "@googlemail.com");
@@ -87,14 +91,17 @@ namespace GoMan
 
                 if (OnEstimatedCompletionTime != null)
                 {
-                    sw.Stop();
-                    var remaining = Configuration.TotalCombinations*2 - generatedEmails.Count;
-                    var estimatedCompletionTime = sw.ElapsedTicks*remaining;
+                    if (sw != null)
+                    {
+                        sw.Stop();
+                        var remaining = Configuration.TotalCombinations*2 - generatedEmails.Count;
+                        var estimatedCompletionTime = sw.ElapsedTicks*remaining;
 
-                    var gmailDotGeneratorEventArgs = new GmailDotGeneratorEventArgs(generatedEmails.Count,
-                        remaining, estimatedCompletionTime, generatorEmailModel1, generatorEmailModel2);
+                        var gmailDotGeneratorEventArgs = new GmailDotGeneratorEventArgs(generatedEmails.Count,
+                            remaining, estimatedCompletionTime, generatorEmailModel1, generatorEmailModel2);
 
-                    EstimatedCompletionTimeChanged(gmailDotGeneratorEventArgs);
+                        EstimatedCompletionTimeChanged(gmailDotGeneratorEventArgs);
+                    }
                 }
                 username = "";
                 //sb.Clear();
@@ -105,8 +112,8 @@ namespace GoMan
 
         public GmailDotGeneratorEmailModel GetSingleEmail()
         {
-            if (this.GeneratedEmails == null)
-                throw new GmailDotGeneratorExceptionEmailListIsEmptyOrNull(this.Configuration.ToString());
+            if (GeneratedEmails == null)
+                throw new GmailDotGeneratorExceptionEmailListIsEmptyOrNull(Configuration.ToString());
 
             try
             {
@@ -114,7 +121,7 @@ namespace GoMan
             }
             catch
             {
-                throw new GmailDotGeneratorExceptionNoAvaliableEmails(this.Configuration.ToString());
+                throw new GmailDotGeneratorExceptionNoAvaliableEmails(Configuration.ToString());
             }
         }
 
@@ -125,29 +132,29 @@ namespace GoMan
 
         public IEnumerator<GmailDotGeneratorEmailModel> GetEnumerable()
         {
-            if (this.GeneratedEmails == null || this.GeneratedEmails.Count == 0)
-                throw new GmailDotGeneratorExceptionEmailListIsEmptyOrNull(this.Configuration.ToString());
+            if (GeneratedEmails == null || GeneratedEmails.Count == 0)
+                throw new GmailDotGeneratorExceptionEmailListIsEmptyOrNull(Configuration.ToString());
 
-            return this.GeneratedEmails.AsEnumerable().GetEnumerator();
+            return GeneratedEmails.AsEnumerable().GetEnumerator();
         }
 
         public IEnumerator<GmailDotGeneratorEmailModel> SetMaximumEmails(int value)
         {
-            this.Configuration.MaximumEmails = Math.Abs(value);
-            this.GeneratedEmails = Generate();
+            Configuration.MaximumEmails = Math.Abs(value);
+            GeneratedEmails = Generate();
 
             return GetEnumerable();
         }
 
         public void ClearEmails()
         {
-            if (this.GeneratedEmails != null && this.GeneratedEmails.Count > 0)
-                this.GeneratedEmails.Clear();
+            if (GeneratedEmails != null && GeneratedEmails.Count > 0)
+                GeneratedEmails.Clear();
         }
 
         protected void EstimatedCompletionTimeChanged(GmailDotGeneratorEventArgs gmailDotGeneratorEventArgs)
         {
-            this.OnEstimatedCompletionTime?.Invoke(this, gmailDotGeneratorEventArgs);
+            OnEstimatedCompletionTime?.Invoke(this, gmailDotGeneratorEventArgs);
         }
 
 
@@ -157,8 +164,8 @@ namespace GoMan
             {
                 if (!Directory.Exists("GmailDotGenerator")) Directory.CreateDirectory("GmailDotGenerator");
 
-                string settings = JsonConvert.SerializeObject(this, Formatting.Indented);
-                using (StreamWriter sw = new StreamWriter($"./GmailDotGenerator/{this.Configuration.Email}.json", false)
+                var settings = JsonConvert.SerializeObject(this, Formatting.Indented);
+                using (var sw = new StreamWriter($"./GmailDotGenerator/{Configuration.Email}.json", false)
                     )
                     sw.WriteLine(settings);
             }
@@ -172,29 +179,28 @@ namespace GoMan
 
         public static GmailDotGenerator Load(string email, int maximumEmails = 0)
         {
-            if (File.Exists($"./GmailDotGenerator/{email}.json"))
-            {
-                using (StreamReader sr = new StreamReader($"./GmailDotGenerator/{email}.json"))
-                {
-                    var gmailDotGenerator = JsonConvert.DeserializeObject<GmailDotGenerator>(sr.ReadToEnd());
-                    if (gmailDotGenerator.Configuration.MaximumEmails != maximumEmails)
-                        gmailDotGenerator.SetMaximumEmails(maximumEmails);
+            if (!EmailDataJsonExists(email)) return new GmailDotGenerator(email, maximumEmails);
 
-                    return gmailDotGenerator;
-                }
-            }
-            else
-                return new GmailDotGenerator(email, maximumEmails);
+            var emailDataFromJson = GetEmailDataFromJson(email);
+            var gmailDotGenerator = JsonConvert.DeserializeObject<GmailDotGenerator>(emailDataFromJson);
+
+            if (gmailDotGenerator.Configuration.MaximumEmails != maximumEmails)
+                gmailDotGenerator.SetMaximumEmails(maximumEmails);
+
+            return gmailDotGenerator;
         }
 
-        public void Dispose()
+        private static string GetEmailDataFromJson(string email)
         {
-            Configuration.Dispose();
-            GeneratedEmails.Clear();
-            OnEstimatedCompletionTime = null;
+            using (var sr = new StreamReader($"./GmailDotGenerator/{email}.json"))
+            {
+                return sr.ReadToEnd();
+            }
+        }
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+        private static bool EmailDataJsonExists(string email)
+        {
+            return File.Exists($"./GmailDotGenerator/{email}.json");
         }
     }
 }

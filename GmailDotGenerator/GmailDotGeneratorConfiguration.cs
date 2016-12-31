@@ -1,39 +1,47 @@
 ﻿using System;
+using System.Net.Mail;
 using Newtonsoft.Json;
 
 namespace GoMan
 {
     public class GmailDotGeneratorConfiguration : IDisposable
     {
-        public string Email { get; private set; }
-        public string Username { get; private set; }
-        public int TotalCombinations { get; private set; }
-        public int MaximumEmails { get; set; }
-
         internal readonly int UsernameLength;
         internal readonly int UsernameLengthMinusOne;
 
         [JsonConstructor]
         public GmailDotGeneratorConfiguration(string email, int maximumEmails = 0)
         {
-            this.Email = email;
-            this.Username = email.Split('@')[0];
-            this.UsernameLength = this.Username.Length;
-            this.UsernameLengthMinusOne = this.UsernameLength - 1;
-            this.TotalCombinations = (int) Math.Pow(2, this.UsernameLengthMinusOne);
-            this.MaximumEmails = maximumEmails;
+            Email = email;
+            Username = email.Split('@')[0];
+            UsernameLength = Username.Length;
+            UsernameLengthMinusOne = UsernameLength - 1;
+            TotalCombinations = (int) Math.Pow(2, UsernameLengthMinusOne);
+            MaximumEmails = maximumEmails;
 
             if (!IsValidEmail(email)) throw new GmailDotGeneratorExceptionEmailInvalid(ToString());
             if (UsernameLength <= 1) throw new GmailDotGeneratorExceptionEmailUsernameTooShort(ToString());
             if (UsernameLength > 64) throw new GmailDotGeneratorExceptionEmailUsernameTooLong(ToString());
         }
 
+        public string Email { get; private set; }
+        public string Username { get; private set; }
+        public int TotalCombinations { get; }
+        public int MaximumEmails { get; set; }
+
+        public void Dispose()
+        {
+            Email = null;
+            Username = null;
+        }
+
         private static bool IsValidEmail(string email)
         {
             try
             {
-                var addr = new System.Net.Mail.MailAddress(email);
-                return addr.Address == email && (email.ToLower().Contains("gmail.com") || email.ToLower().Contains("googlemail.com"));
+                var addr = new MailAddress(email);
+                return addr.Address == email &&
+                       (email.ToLower().Contains("gmail.com") || email.ToLower().Contains("googlemail.com"));
             }
             catch
             {
@@ -43,13 +51,8 @@ namespace GoMan
 
         public sealed override string ToString()
         {
-            return $"Email: {Email}, Username: {Username}, TotalCombinations: {TotalCombinations}, MaximumEmails: {MaximumEmails}, UsernameLength: {UsernameLength}";
-        }
-
-        public void Dispose()
-        {
-            Email = null;
-            Username = null;
+            return
+                $"Email: {Email}, Username: {Username}, TotalCombinations: {TotalCombinations}, MaximumEmails: {MaximumEmails}, UsernameLength: {UsernameLength}";
         }
     }
 }

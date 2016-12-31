@@ -1,26 +1,23 @@
 ﻿using System;
-using System.CodeDom;
 
 namespace GoMan
 {
-    class ExampleProgram
+    internal class ExampleProgram
     {
-        static void Main(string[] args)
-        {
+        private static int _lastSecondsRemaining;
 
+        private static void Main()
+        {
             PrintEmails("short@googlemail.com");
             PrintEmails("longernotmuch@googlemail.com");
             Console.ReadLine();
-
         }
 
-        private static int _lastSecondsRemaining = 0;
-
-        static void OnEmailGenerated(object sender, GmailDotGeneratorEventArgs e)
+        private static void OnEmailGenerated(object sender, GmailDotGeneratorEventArgs e)
         {
             //Console.Clear();
-            TimeSpan ts = new TimeSpan(e.EstimatedCompletionTime);
-            int secondsRemaining = (int) ts.TotalMilliseconds/1000;
+            var ts = new TimeSpan(e.EstimatedCompletionTime);
+            var secondsRemaining = (int) ts.TotalMilliseconds/1000;
 
             if (secondsRemaining != _lastSecondsRemaining)
             {
@@ -30,7 +27,7 @@ namespace GoMan
             }
         }
 
-        static void PrintEmails(string email)
+        private static void PrintEmails(string email)
         {
             try
             {
@@ -43,13 +40,13 @@ namespace GoMan
                     Console.ReadLine();
 
                     if (gmailDotGenerator.GeneratedEmails == null)
-                            gmailDotGenerator.GenerateEmails();
+                        gmailDotGenerator.GenerateEmails();
                     try
                     {
-                       while (true)
-                       {
-                           Console.WriteLine(gmailDotGenerator.GetSingleEmailAndMarkUsed());
-                       }
+                        while (true)
+                        {
+                            Console.WriteLine(gmailDotGenerator.GetSingleEmailAndMarkUsed());
+                        }
 
                         Console.WriteLine("Done! Press any key to continue....");
                         Console.ReadLine();
