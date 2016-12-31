@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace GoMan
 {
-    public class GmailDotGenerator : IDisposable
+    public sealed class GmailDotGenerator : IDisposable
     {
         public delegate void EstimatedCompletionTime(object sender, GmailDotGeneratorEventArgs e);
 
@@ -27,10 +27,8 @@ namespace GoMan
 
         public void Dispose()
         {
-            Configuration.Dispose();
             GeneratedEmails.Clear();
             OnEstimatedCompletionTime = null;
-
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }
@@ -152,7 +150,7 @@ namespace GoMan
                 GeneratedEmails.Clear();
         }
 
-        protected void EstimatedCompletionTimeChanged(GmailDotGeneratorEventArgs gmailDotGeneratorEventArgs)
+        private void EstimatedCompletionTimeChanged(GmailDotGeneratorEventArgs gmailDotGeneratorEventArgs)
         {
             OnEstimatedCompletionTime?.Invoke(this, gmailDotGeneratorEventArgs);
         }

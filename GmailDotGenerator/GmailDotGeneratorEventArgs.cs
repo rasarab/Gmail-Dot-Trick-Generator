@@ -1,6 +1,8 @@
-﻿namespace GoMan
+﻿using System;
+
+namespace GoMan
 {
-    public class GmailDotGeneratorEventArgs
+    public class GmailDotGeneratorEventArgs : EventArgs
     {
         public long EstimatedCompletionTime { get; }
         public int CreatedCount { get; }

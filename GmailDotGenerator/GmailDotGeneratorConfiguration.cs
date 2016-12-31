@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace GoMan
 {
-    public class GmailDotGeneratorConfiguration : IDisposable
+    public sealed class GmailDotGeneratorConfiguration
     {
         internal readonly int UsernameLength;
         internal readonly int UsernameLengthMinusOne;
@@ -28,12 +28,6 @@ namespace GoMan
         public string Username { get; private set; }
         public int TotalCombinations { get; }
         public int MaximumEmails { get; set; }
-
-        public void Dispose()
-        {
-            Email = null;
-            Username = null;
-        }
 
         private static bool IsValidEmail(string email)
         {

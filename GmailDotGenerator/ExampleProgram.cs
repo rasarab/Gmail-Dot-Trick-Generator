@@ -9,7 +9,7 @@ namespace GoMan
         private static void Main()
         {
             PrintEmails("short@googlemail.com");
-            PrintEmails("longernotmuch@googlemail.com");
+            PrintEmails("longernotmuchdffffff@googlemail.com");
             Console.ReadLine();
         }
 
