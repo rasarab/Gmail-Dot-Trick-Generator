@@ -132,7 +132,7 @@ namespace GoMan
 
         public IEnumerator<GmailDotGeneratorEmailModel> GetEnumerable()
         {
-            if (GeneratedEmails == null || GeneratedEmails.Count == 0)
+            if (GeneratedEmails == null)
                 throw new GmailDotGeneratorExceptionEmailListIsEmptyOrNull(Configuration.ToString());
 
             return GeneratedEmails.AsEnumerable().GetEnumerator();
@@ -165,8 +165,7 @@ namespace GoMan
                 if (!Directory.Exists("GmailDotGenerator")) Directory.CreateDirectory("GmailDotGenerator");
 
                 var settings = JsonConvert.SerializeObject(this, Formatting.Indented);
-                using (var sw = new StreamWriter($"./GmailDotGenerator/{Configuration.Email}.json", false)
-                    )
+                using (var sw = new StreamWriter($"./GmailDotGenerator/{Configuration.Email}.json", false))
                     sw.WriteLine(settings);
             }
             catch
@@ -182,7 +181,7 @@ namespace GoMan
             if (!EmailDataJsonExists(email)) return new GmailDotGenerator(email, maximumEmails);
 
             var emailDataFromJson = GetEmailDataFromJson(email);
-            var gmailDotGenerator = JsonConvert.DeserializeObject<GmailDotGenerator>(emailDataFromJson);
+            var gmailDotGenerator = DeserializeEmailJson(emailDataFromJson);
 
             if (gmailDotGenerator.Configuration.MaximumEmails != maximumEmails)
                 gmailDotGenerator.SetMaximumEmails(maximumEmails);
@@ -190,12 +189,14 @@ namespace GoMan
             return gmailDotGenerator;
         }
 
+        private static GmailDotGenerator DeserializeEmailJson(string data)
+        {
+            return JsonConvert.DeserializeObject<GmailDotGenerator>(data);
+        }
         private static string GetEmailDataFromJson(string email)
         {
             using (var sr = new StreamReader($"./GmailDotGenerator/{email}.json"))
-            {
                 return sr.ReadToEnd();
-            }
         }
 
         private static bool EmailDataJsonExists(string email)
