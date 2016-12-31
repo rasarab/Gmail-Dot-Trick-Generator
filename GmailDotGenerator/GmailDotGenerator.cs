@@ -45,7 +45,6 @@ namespace GoMan
         private HashSet<GmailDotGeneratorEmailModel> Generate()
         {
             var generatedEmails = new HashSet<GmailDotGeneratorEmailModel>();
-            //StringBuilder sb = new StringBuilder();
             var username = "";
             Stopwatch sw = null;
 
@@ -69,20 +68,14 @@ namespace GoMan
                 for (var j = 0; j < Configuration.UsernameLengthMinusOne; j++)
                 {
                     username += Configuration.Username[j];
-                    // sb.Append(this.Configuration.Username[j]);
+
                     if (binaryString[j] == '1')
-                    {
                         username += ".";
-                        // sb.Append(".");
-                    }
                 }
                 username += Configuration.Username[Configuration.UsernameLengthMinusOne];
-                //sb.Append(this.Configuration.Username[this.Configuration.UsernameLengthMinusOne]);
+
                 var generatorEmailModel1 = new GmailDotGeneratorEmailModel(username + "@gmail.com");
                 var generatorEmailModel2 = new GmailDotGeneratorEmailModel(username + "@googlemail.com");
-
-                //var generatorEmailModel1 = new GmailDotGeneratorEmailModel(sb.ToString() + "@gmail.com");
-                //var generatorEmailModel2 = new GmailDotGeneratorEmailModel(sb.ToString() + "@googlemail.com");
 
                 generatedEmails.Add(generatorEmailModel1);
                 generatedEmails.Add(generatorEmailModel2);
